@@ -4,7 +4,7 @@ import HandTracker as ht
 
 width = 1280
 height = 720
-cap = cv.VideoCapture(1)
+cap = cv.VideoCapture(0)
 
 detector = ht.HandDetector(maxhands=1 , detectconf=0.8)
 
@@ -17,7 +17,8 @@ while True :
     
     if hands:
         hand=hands[0]
-        # landmarks = hand['lmList']
+        landmarks = detector.findposition(frame)
+        print(landmarks)
         # print(landmarks)
 
 

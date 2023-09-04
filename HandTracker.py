@@ -30,16 +30,31 @@ class HandDetector():
     def findposition(self , img , handno = 0 , draw = True):
 
         lmlist = []
+        DEPTH_MIN = 0.0  
+        DEPTH_MAX = 100.0
 
         if self.results.multi_hand_landmarks:
             myhand = self.results.multi_hand_landmarks[handno]
+            x0, y0, z0 = myhand.landmark[0].x, myhand.landmark[0].y, 0.0
+            #print(x0,y0,z0)
             for id , lm in enumerate(myhand.landmark):
                 h , w , c = img.shape
                 cx , cy = int(lm.x*w) , int(lm.y*h)
-                lmlist.append([id , cx , cy ])
+                
+
+
+                if id == 0:  # Skip the palm landmark (landmark 0)
+                    continue
+                if myhand:
+                    normalized_depth = 1.0 - (lm.y / 2.0)
+                    cz = int(DEPTH_MIN + (normalized_depth * (DEPTH_MAX - DEPTH_MIN)))
+                #print(normalized_depth)
+
+                lmlist.append([ cx , cy , cz])
+                #print(cx , cy , cz)
                 if draw : 
                     cv.circle(img , (cx,cy) , 7 , (255 , 0 , 255) , cv.FILLED)
-
+            #print(lmlist[4])
 
         return lmlist
 
@@ -54,14 +69,14 @@ class HandDetector():
 def main():
     ptime = 0
     ctime = 0
-    cap = cv.VideoCapture(1)
+    cap = cv.VideoCapture(0)
     detector = HandDetector()
     while True:
         success , img = cap.read()
-        img = detector.findhands(img)
+        imge = detector.findhands(img)
         landmarks = detector.findposition(img , 0 , False)
-        if len(landmarks) != 0 :
-            print(landmarks[0])
+        #if len(landmarks) != 0 :
+            #print(landmarks[0])
         
         ctime = time.time()
         fps = 1/(ctime-ptime)
